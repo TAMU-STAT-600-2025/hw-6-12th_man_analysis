@@ -96,4 +96,7 @@ test_that("multiplication works", {
                "The number of rows in beta_init should be p.")
   expect_error(LRMultiClass(X, y, beta_init[, -1]),
                "The number of columns in beta_init should be K.")
+  
+  # Test if beta_init is properly initialized
+  expect_no_error(LRMultiClass(X, y))
 })
