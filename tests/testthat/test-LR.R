@@ -72,4 +72,28 @@ test_that("multiplication works", {
   expect_equal(LRMultiClass_HW3(X, y, beta_init),
                LRMultiClass(X, y, beta_init),
                ignore_attr = TRUE)
+  
+  # Test if the compatibility checks for the first columns of X work appropriately
+  expect_error(LRMultiClass(X[, -1], y, beta_init),
+               "The first column of X should be 1s.")
+  
+  # Test if the compatibility check for the dimensions between X & y works appropriately
+  expect_error(
+    LRMultiClass(X[-1, ], y, beta_init),
+    "The number of rows in X should be equal to the length of y."
+  )
+  
+  # Test if the compatibility check for eta works appropriately
+  expect_error(LRMultiClass(X, y, beta_init, eta = -0.1),
+               "eta should be positive.")
+  
+  # Test if the compatibility check for lambda works appropriately
+  expect_error(LRMultiClass(X, y, beta_init, lambda = -1),
+               "lambda should be non-ngeative.")
+  
+  # Test if the compatibility checks for beta_init work appropriately
+  expect_error(LRMultiClass(X, y, beta_init[-1, ]),
+               "The number of rows in beta_init should be p.")
+  expect_error(LRMultiClass(X, y, beta_init[, -1]),
+               "The number of columns in beta_init should be K.")
 })
