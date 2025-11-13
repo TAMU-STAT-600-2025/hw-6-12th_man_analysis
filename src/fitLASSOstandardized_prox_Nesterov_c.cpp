@@ -8,6 +8,16 @@
 //
 // [[Rcpp::depends(RcppArmadillo)]]
 
+// v - p x 1 vector
+// Soft-thresholding function, returns vector
+// [[Rcpp::export]]
+arma::colvec soft(const arma::colvec& v, double lambda){
+  // Soft-threshold each coordinate (shrink by lambda, zero out small values)
+  arma::colvec shrunken = arma::clamp(arma::abs(v) - lambda, 0, arma::datum::inf);
+  return arma::sign(v) % shrunken;
+}
+
+
 // Xtilde - centered and scaled X, n x p
 // Ytilde - centered Y, n x 1
 // lambda - tuning parameter

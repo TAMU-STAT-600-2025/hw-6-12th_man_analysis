@@ -27,6 +27,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// soft
+arma::colvec soft(const arma::colvec& v, double lambda);
+RcppExport SEXP _GroupHW_soft(SEXP vSEXP, SEXP lambdaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::colvec& >::type v(vSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    rcpp_result_gen = Rcpp::wrap(soft(v, lambda));
+    return rcpp_result_gen;
+END_RCPP
+}
 // fitLASSOstandardized_prox_Nesterov_c
 arma::colvec fitLASSOstandardized_prox_Nesterov_c(const arma::mat& Xtilde, const arma::colvec& Ytilde, double lambda, const arma::colvec& beta_start, double eps, double s);
 RcppExport SEXP _GroupHW_fitLASSOstandardized_prox_Nesterov_c(SEXP XtildeSEXP, SEXP YtildeSEXP, SEXP lambdaSEXP, SEXP beta_startSEXP, SEXP epsSEXP, SEXP sSEXP) {
@@ -60,6 +72,7 @@ END_RCPP
 
 static const R_CallMethodDef CallEntries[] = {
     {"_GroupHW_LRMultiClass_c", (DL_FUNC) &_GroupHW_LRMultiClass_c, 6},
+    {"_GroupHW_soft", (DL_FUNC) &_GroupHW_soft, 2},
     {"_GroupHW_fitLASSOstandardized_prox_Nesterov_c", (DL_FUNC) &_GroupHW_fitLASSOstandardized_prox_Nesterov_c, 6},
     {"_GroupHW_MyKmeans_c", (DL_FUNC) &_GroupHW_MyKmeans_c, 4},
     {NULL, NULL, 0}
