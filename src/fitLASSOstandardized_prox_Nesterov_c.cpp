@@ -17,6 +17,25 @@ arma::colvec soft(const arma::colvec& v, double lambda){
   return arma::sign(v) % shrunken;
 }
 
+// Xtilde - centered and scaled X, n x p
+// Ytilde - centered Y, n x 1
+// beta - value of beta at which to evaluate the function
+// lamdba - tuning parameter
+// Lasso objective function, returns scalar
+// [[Rcpp::export]]
+double lasso(const arma::mat& Xtilde, const arma::colvec& Ytilde, const arma::colvec& beta, double lambda){
+  // Number of observations
+  double n = Xtilde.n_rows;
+  // Compute residuals: Y - Xβ
+  arma::colvec residuals = Ytilde - Xtilde * beta;
+  // Compute residual sum of squares: ||Y - Xβ||²
+  double rss = arma::dot(residuals, residuals);
+  // Compute L1 penalty: sum of absolute coefficients
+  double l1 = arma::norm(beta, 1);
+  // Return LASSO objective: (1 / (2n)) * RSS + λ * ||β||₁
+  return(rss / (2.0 * n) + lambda * l1);
+}
+
 
 // Xtilde - centered and scaled X, n x p
 // Ytilde - centered Y, n x 1

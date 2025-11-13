@@ -9,6 +9,10 @@ soft <- function(v, lambda) {
     .Call(`_GroupHW_soft`, v, lambda)
 }
 
+lasso <- function(Xtilde, Ytilde, beta, lambda) {
+    .Call(`_GroupHW_lasso`, Xtilde, Ytilde, beta, lambda)
+}
+
 fitLASSOstandardized_prox_Nesterov_c <- function(Xtilde, Ytilde, lambda, beta_start, eps = 0.0001, s = 0.01) {
     .Call(`_GroupHW_fitLASSOstandardized_prox_Nesterov_c`, Xtilde, Ytilde, lambda, beta_start, eps, s)
 }
