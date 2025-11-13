@@ -48,3 +48,24 @@ test_that("lasso matches lasso_r for multiple inputs", {
                lasso(X3, Y3, beta3, lambda),
                tolerance = 1e-8)
 })
+
+test_that("Check that calculate_lambda_tp1 returns correct output", {
+  
+  # --- Test Case 1: lambda_t = 0.0 ---
+  # Expected: 1.0
+  result <- calculate_lambda_tp1(0.0)
+  expect_equal(result, 1.0, tolerance = 1e-6)
+  
+  
+  # --- Test Case 2: lambda_t = sqrt(2) ---
+  # Expected: 2.0
+  result <- calculate_lambda_tp1(sqrt(2))
+  expect_equal(result, 2.0, tolerance = 1e-6)
+  
+  
+  # --- Test Case 3: lambda_t = sqrt(6) ---
+  # Expected: 3.0
+  result <- calculate_lambda_tp1(sqrt(6))
+  expect_equal(result, 3.0, tolerance = 1e-6)
+  
+})

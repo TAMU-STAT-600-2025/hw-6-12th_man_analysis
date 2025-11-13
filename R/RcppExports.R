@@ -13,6 +13,10 @@ lasso <- function(Xtilde, Ytilde, beta, lambda) {
     .Call(`_GroupHW_lasso`, Xtilde, Ytilde, beta, lambda)
 }
 
+calculate_lambda_tp1 <- function(lambda_t) {
+    .Call(`_GroupHW_calculate_lambda_tp1`, lambda_t)
+}
+
 fitLASSOstandardized_prox_Nesterov_c <- function(Xtilde, Ytilde, lambda, beta_start, eps = 0.0001, s = 0.01) {
     .Call(`_GroupHW_fitLASSOstandardized_prox_Nesterov_c`, Xtilde, Ytilde, lambda, beta_start, eps, s)
 }

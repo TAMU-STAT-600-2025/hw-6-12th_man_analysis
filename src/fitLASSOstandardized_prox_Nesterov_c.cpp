@@ -2,6 +2,7 @@
 
 // we only include RcppArmadillo.h which pulls Rcpp.h in for us
 #include "RcppArmadillo.h"
+#include <cmath>
 
 // via the depends attribute we tell Rcpp to create hooks for
 // RcppArmadillo so that the build process will know what to do
@@ -34,6 +35,14 @@ double lasso(const arma::mat& Xtilde, const arma::colvec& Ytilde, const arma::co
   double l1 = arma::norm(beta, 1);
   // Return LASSO objective: (1 / (2n)) * RSS + λ * ||β||₁
   return(rss / (2.0 * n) + lambda * l1);
+}
+
+// lambda_t - scalar
+// Update the Nesterov acceleration coefficient for the next iteration
+// [[Rcpp::export]]
+double calculate_lambda_tp1(double lambda_t){
+  double discriminant = 1.0 + 4.0 * (lambda_t * lambda_t);
+  return (1.0 + std::sqrt(discriminant)) / 2.0;
 }
 
 
