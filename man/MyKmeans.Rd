@@ -2,25 +2,30 @@
 % Please edit documentation in R/Kmeans_wrapper.R
 \name{MyKmeans}
 \alias{MyKmeans}
-\title{Title}
+\title{K-Means Clustering}
 \usage{
 MyKmeans(X, K, M = NULL, numIter = 100)
 }
 \arguments{
-\item{X}{}
+\item{X}{Matrix of data points, where rows are observations (n) and columns are features (p)}
 
-\item{K}{}
+\item{K}{Integer specifying the number of clusters}
 
-\item{M}{}
+\item{M}{An optional K x p matrix of initial cluster centroids. If NULL (default), K points are randomly sampled from X as initial centroids}
 
-\item{numIter}{}
+\item{numIter}{The maximum number of iterations to run the algorithm (default: 100)}
 }
 \value{
-Explain return
+Vector of length n containing the cluster assignments (integers from 1 to K) for each observation
 }
 \description{
-Title
+K-Means Clustering
 }
 \examples{
-# Give example
+X1 <- matrix(rnorm(50 * 2, mean = 0), 50, 2)
+X2 <- matrix(rnorm(50 * 2, mean = 4), 50, 2)
+data <- rbind(X1, X2)
+
+# Run K-Means with K=2
+cluster_assignments <- MyKmeans(data, K = 2, numIter = 100)
 }
