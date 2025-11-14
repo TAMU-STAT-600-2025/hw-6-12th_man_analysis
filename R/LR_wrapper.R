@@ -47,6 +47,15 @@ LRMultiClass <- function(X, y, beta_init = NULL, numIter = 50, eta = 0.1, lambda
     stop("lambda should be non-negative")
   }
   
+  # Check whether beta_init is NULL. If NULL, initialize beta with p x K matrix of zeroes. If not NULL, check for compatibility of dimensions with what has been already supplied.
+  if (is.null(beta_init)) {
+    beta_init = matrix(0, nrow = p, ncol = K)
+  } else if (nrow(beta_init) != p) {
+    stop("beta_init must have the same number of rows as columns of X")
+  } else if (ncol(beta_init) != K) {
+    stop("beta_init must have the same number of columns as the number of class labels in Y")
+  }
+  
   # Call C++ LRMultiClass_c function to implement the algorithm
   out = LRMultiClass_c(X, y, beta_init, numIter, eta, lambda)
   
