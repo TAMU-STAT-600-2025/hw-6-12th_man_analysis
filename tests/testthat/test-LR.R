@@ -18,7 +18,7 @@ LRMultiClass_HW3 <- function(X,
     stop("eta should be positive.")
   }
   if (lambda < 0) {
-    stop("lambda should be non-ngeative.")
+    stop("lambda should be non-negative")
   }
   if (is.null(beta_init)) {
     beta_init <- matrix(0, nrow = p, ncol = K)
