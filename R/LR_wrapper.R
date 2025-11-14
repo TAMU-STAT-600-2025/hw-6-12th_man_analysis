@@ -17,6 +17,7 @@ LRMultiClass <- function(X, y, beta_init = NULL, numIter = 50, eta = 0.1, lambda
   # Compatibility checks from HW3 and initialization of beta_init
   n <- nrow(X)
   p <- ncol(X)
+  K <- max(y) + 1
   # Check that the first column of X and Xt are 1s, if not - display appropriate message and stop execution.
   # Check that first column of X are 1s
   if (!all(X[, 1] == 1)) {
