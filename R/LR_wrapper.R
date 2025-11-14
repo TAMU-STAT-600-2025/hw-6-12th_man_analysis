@@ -22,21 +22,9 @@ LRMultiClass <- function(X, y, beta_init = NULL, numIter = 50, eta = 0.1, lambda
   if (!all(X[, 1] == 1)) {
     stop("X should have an intercept column of only ones")
   }
-  # Check that first column of Xt are 1s
-  if (!all(Xt[, 1] == 1)) {
-    stop("Xt should have an intercept column of only ones")
-  }
   # Check for compatibility of dimensions between X and Y
   if (n != length(y)) {
     stop("X and Y should have same number of rows")
-  }
-  # Check for compatibility of dimensions between Xt and Yt
-  if (nrow(Xt) != length(yt)) {
-    stop("Xt and Yt should have same number of rows")
-  }
-  # Check for compatibility of dimensions between X and Xt
-  if (p != ncol(Xt)) {
-    stop("X and Xt should have same number of columns")
   }
   # Check eta is positive
   if (eta <= 0) {
