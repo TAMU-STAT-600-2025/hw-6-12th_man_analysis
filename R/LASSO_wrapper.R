@@ -1,3 +1,18 @@
+# Xtilde - centered and scaled X, n x p
+# Ytilde - centered Y, n x 1
+# lamdba - tuning parameter
+# beta - value of beta at which to evaluate the function
+lasso <- function(Xtilde, Ytilde, beta, lambda){
+  # Number of observations
+  n <- nrow(Xtilde)
+  # Compute residual sum of squares: ||Y - Xβ||²
+  rss <- as.numeric(crossprod(Ytilde - Xtilde %*% beta))
+  # Compute L1 penalty: sum of absolute coefficients
+  l1_penalty <- sum(abs(beta))
+  # Return LASSO objective: (1 / (2n)) * RSS + λ * ||β||₁
+  return(rss / (2 * n) + lambda * l1_penalty)
+}
+
 #' LASSO with Proximal Gradient Descent
 #'
 #' @param X A n x p matrix of centered and scaled X
