@@ -61,6 +61,29 @@ arma::colvec fitLASSOstandardized_prox_Nesterov_c(const arma::mat& Xtilde, const
   // Initialize some parameters
   int n = Xtilde.n_rows, p = Xtilde.n_cols;
   arma::colvec beta(p);
+  
+  beta = beta_start;
+  double lambda_t = 1;
+  arma::colvec xt_old(p);
+  xt_old = beta;
+  double f_old = lasso(Xtilde, Ytilde, beta, lambda);
+  while (true) {
+    arma::colvec gradient_step(p);
+    gradient_step = beta + (s / n) * Xtilde.t() * (Ytilde - Xtilde * beta);
+    arma::colvec xt(p);
+    xt = soft(gradient_step, lambda * s);
+    double lambda_tp1 = calculate_lambda_tp1(lambda_t);
+    beta = xt + (lambda_t - 1) / (lambda_tp1) * (xt - xt_old);
+    
+    double f_new = lasso(Xtilde, Ytilde, beta, lambda);
+    double error = f_old - f_new;
+    if (std::abs(error) < eps) {
+      break;
+    }
+    f_old = f_new;
+    xt_old = xt;
+    lambda_t = lambda_tp1;
+  }
 
   return beta;
 }

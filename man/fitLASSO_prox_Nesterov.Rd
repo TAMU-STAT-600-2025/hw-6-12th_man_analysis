@@ -2,21 +2,34 @@
 % Please edit documentation in R/LASSO_wrapper.R
 \name{fitLASSO_prox_Nesterov}
 \alias{fitLASSO_prox_Nesterov}
-\title{Title}
+\title{LASSO with Proximal Gradient Descent}
 \usage{
 fitLASSO_prox_Nesterov(X, Y, lambda, beta_start = NULL, eps = 1e-04, s = 0.01)
 }
 \arguments{
-\item{X}{}
+\item{X}{A n x p matrix of centered and scaled X}
 
-\item{lambda}{}
+\item{Y}{A n x 1 matrix of centered Y}
 
-\item{beta_start}{}
+\item{lambda}{A tuning parameter}
 
-\item{eps}{}
+\item{beta_start}{A p x 1 vector of starting point for coordinate-descent algorithm (default: NULL)}
 
-\item{s}{}
+\item{eps}{A precision level for convergence assessment (default: 0.0001)}
+
+\item{s}{A step size for proximal gradient descent}
+}
+\value{
+A solution for LASSO regression and the optimal objective function value
 }
 \description{
-Title
+LASSO with Proximal Gradient Descent
+}
+\examples{
+X <- matrix(rnorm(100 * 5), 100, 5)
+beta <- c(-2, 0, 1, 0, 3)
+epsilon <- rnorm(100)
+Y <- X \%*\% beta + epsilon
+beta_start <- rep(0, 5)
+fitLASSO_prox_Nesterov(X, Y, 0.1, beta_start)
 }
