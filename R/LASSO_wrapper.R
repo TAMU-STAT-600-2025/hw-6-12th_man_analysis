@@ -21,8 +21,33 @@ fitLASSO_prox_Nesterov <- function(X, Y, lambda,
                                    beta_start = NULL, eps = 0.0001, s = 0.01){
   
   # Compatibility checks from ProximalExamples and initialization of beta_init
+  p <- ncol(X)
+  n <- nrow(X)
+  if (length(Y) != n){
+    stop("Dimensions of X and Y don't match")
+  }
+  if (lambda < 0){
+    stop("Only non-negative values of lambda are allowed!")
+  }
+  if (is.null(beta_start)){
+    # Initialize beta0
+    beta_start <- rep(0,p)
+  }else if (length(beta_start) != p){
+    stop("Supplied initial starting point has length different from p!")
+  }
   
   # Center and standardize X,Y as in HW4
+  # Center Y
+  Ymean <- mean(Y)
+  Ytilde <- Y - Ymean
+  
+  # Center X
+  Xmeans <- colMeans(X)
+  Xcentered <- X - matrix(Xmeans, n, p, byrow = TRUE)
+  
+  # Scale X
+  weights = sqrt(colSums(Xcentered^2) / n)
+  Xtilde <- Xcentered %*% diag(1 / weights)
   
   # Call C++ fitLASSOstandardized_prox_Nesterov_c function to implement the algorithm
   beta_tilde = fitLASSOstandardized_prox_Nesterov_c(Xtilde, Ytilde, lambda, beta_start, eps, s)
