@@ -93,6 +93,94 @@ fitLASSOstandardized <- function(Xtilde, Ytilde, lambda, beta_start = NULL, eps 
   return(list(beta = beta, fmin = fmin))
 }
 
+fitLASSOstandardized_seq <- function(Xtilde, Ytilde, lambda_seq = NULL, n_lambda = 60, eps = 0.001){
+  # [ToDo] Check that n is the same between Xtilde and Ytilde
+  n <- nrow(Xtilde)
+  if (n != length(Ytilde)){
+    stop("Xtilde and Ytilde should have same number of rows")
+  }
+  p <- ncol(Xtilde)
+  # [ToDo] Check for the user-supplied lambda-seq (see below)
+  # If lambda_seq is supplied, only keep values that are >= 0,
+  # and make sure the values are sorted from largest to smallest.
+  # If none of the supplied values satisfy the requirement,
+  # print the warning message and proceed as if the values were not supplied.
+  
+  if (!is.null(lambda_seq)){
+    # Only keep lambdas >= 0
+    lambda_seq <- lambda_seq[lambda_seq >= 0]
+    # Sort lambdas from largest to smallest
+    lambda_seq <- sort(lambda_seq, decreasing = TRUE)
+    if(length(lambda_seq) == 0){
+      warning("Invalid lambda_seq detected: only positive values should be supplied.")
+      lambda_seq <- NULL
+    }
+  }
+  
+  # If lambda_seq is not supplied, calculate lambda_max 
+  # (the minimal value of lambda that gives zero solution)
+  if (is.null(lambda_seq)){
+    XtY <- t(Xtilde) %*% Ytilde
+    # Compute λ_max = max(|X_jᵀY| / n);
+    # when λ ≥ λ_max, the soft-thresholding step sets all β_j = 0 (null solution)
+    lambda_max <- max(abs(XtY)) / n
+    # create a sequence of length n_lambda as
+    lambda_seq = exp(seq(log(lambda_max), log(0.01), length = n_lambda))
+  }
+  # calculate length of lambda_seq
+  num_lambda <- length(lambda_seq)
+  # initialize matrix of solutions at each lambda value
+  beta_mat <- matrix(0, nrow = p, ncol = num_lambda)
+  # initialize vector of objective function values at solution for each lambda
+  fmin_vec <- rep(0, num_lambda)
+  # [ToDo] Apply fitLASSOstandardized going from largest to smallest lambda 
+  # (make sure supplied eps is carried over). 
+  # Use warm starts strategy discussed in class for setting the starting values.
+  beta <- rep(0, p)
+  for (i in 1:num_lambda){
+    lambda <- lambda_seq[i]
+    # Perform coordinate descent LASSO for the current value of λ
+    out <- fitLASSOstandardized(Xtilde, Ytilde, lambda = lambda, beta_start = beta, eps = eps)
+    # Store the optimal coefficients and objective value for this λ
+    beta_mat[, i] <- out$beta
+    fmin_vec[i] <- out$fmin
+    # Use the current solution as the warm start for the next λ
+    beta <- out$beta
+  }
+  # Return output
+  # lambda_seq - the actual sequence of tuning parameters used
+  # beta_mat - p x length(lambda_seq) matrix of corresponding solutions at each lambda value
+  # fmin_vec - length(lambda_seq) vector of corresponding objective function values at solution
+  return(list(lambda_seq = lambda_seq, beta_mat = beta_mat, fmin_vec = fmin_vec))
+}
+
+fitLASSO <- function(X ,Y, lambda_seq = NULL, n_lambda = 60, eps = 0.001){
+  # [ToDo] Center and standardize X,Y based on standardizeXY function
+  scaledXY <- standardizeXY(X, Y)
+  # Store standardized X, standardized Y, and the scaling weights used to give X unit variance
+  Xtilde <- scaledXY$Xtilde
+  Ytilde <- scaledXY$Ytilde
+  weights <- scaledXY$weights
+  # Store column means of untransformed X and Y
+  Ymean <- scaledXY$Ymean
+  Xmeans <- scaledXY$Xmeans
+  # [ToDo] Fit Lasso on a sequence of values using fitLASSOstandardized_seq
+  # (make sure the parameters carry over)
+  out <- fitLASSOstandardized_seq(Xtilde, Ytilde, lambda_seq = lambda_seq, n_lambda = n_lambda, eps = eps)
+  # [ToDo] Perform back scaling and centering to get original intercept and coefficient vector
+  # for each lambda
+  # Rescale coefficient matrix back to the original data scale
+  beta_mat <- sweep(out$beta_mat, 1, weights, "/")
+  # β₀ = Ymean − Xmeansᵀ β
+  beta0_vec <- Ymean - as.numeric(crossprod(Xmeans, beta_mat))
+  lambda_seq <- out$lambda_seq
+  # Return output
+  # lambda_seq - the actual sequence of tuning parameters used
+  # beta_mat - p x length(lambda_seq) matrix of corresponding solutions at each lambda value (original data without center or scale)
+  # beta0_vec - length(lambda_seq) vector of intercepts (original data without center or scale)
+  return(list(lambda_seq = lambda_seq, beta_mat = beta_mat, beta0_vec = beta0_vec))
+}
+
 
 test_that("soft() correctly applies soft-thresholding to vectors", {
   a <- c(-3, -1, -0.5, 0.5, 1, 3)
@@ -225,4 +313,43 @@ test_that("fitLASSOstandardized_prox_Nesterov_c matches R implementation", {
     tolerance = 1e-5
   )
   
+})
+
+test_that("fitLASSO_prox_Nesterov matches fitLASSO for a single lambda", {
+  
+  set.seed(123)
+  n <- 50
+  p <- 8
+  
+  X <- matrix(rnorm(n * p), nrow = n, ncol = p)
+  beta_true <- c(1.5, -2, 0.5, rep(0, p - 3))
+  Y <- as.vector(X %*% beta_true + rnorm(n, sd = 1))
+  
+  lambda <- 0.1
+  eps    <- 1e-12
+  s      <- 0.01
+  
+
+  fit_path <- fitLASSO(
+    X, Y,
+    lambda_seq = lambda,
+    n_lambda   = 1,
+    eps        = eps
+  )
+  print(fit_path$beta_mat)
+  
+  beta_seq      <- fit_path$beta_mat
+  intercept_seq <- as.numeric(fit_path$beta0_vec[1])
+  
+
+  fit_nest <- fitLASSO_prox_Nesterov(
+    X, Y,
+    lambda     = lambda,
+    beta_start = rep(0, p),
+    eps        = eps,
+    s          = s
+  )
+  
+  expect_equal(fit_nest$beta,      beta_seq,      tolerance = 1e-4)
+  expect_equal(fit_nest$intercept, intercept_seq, tolerance = 1e-4)
 })
