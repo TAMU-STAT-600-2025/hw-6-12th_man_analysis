@@ -19,9 +19,57 @@ arma::uvec MyKmeans_c(const arma::mat& X, int K,
     arma::uvec Y(n); // to store cluster assignments
     
     // Initialize any additional parameters if needed
+    arma::mat Mcopy = M;
     
     // For loop with kmeans algorithm
+    for (int i = 0; i < numIter; ++i) {
+      // Calculate Euclidean distances
+      arma::vec Xnorm = arma::sum(arma::square(X), 1);
+      
+      arma::vec Mnorm = arma::sum(arma::square(Mcopy), 1);
+      
+      arma::mat XMproduct = X * Mcopy.t();
+      
+      arma::mat dists = arma::repmat(Xnorm, 1, K) + arma::repmat(Mnorm.t(), n, 1)
+        - 2.0 * (XMproduct);
+      
+      // Assign clusters
+      for (int i = 0; i < n; ++i) {
+        Y(i) = dists.row(i).index_min();
+      }
+      
+      // Check if any cluster disappeard
+      arma::uvec cluster_counts(K, arma::fill::zeros);
+      for (int i = 0; i < n; ++i){
+        cluster_counts(Y(i))++;
+      }
+      if (arma::any(cluster_counts == 0u)) {
+        Rcpp::stop("Error: One of the clusters has disappeared.");
+      }
+      
+      // Recompute centers
+      arma::mat newM(K, p, arma::fill::zeros);
+      
+      for (int i = 0; i < n; ++i) {
+        newM.row(Y(i)) += X.row(i);
+      }
+      
+      for (int k = 0; k < K; ++k) {
+        newM.row(k) /= static_cast<double>(cluster_counts(k));
+      }
+      
+      // Check convergence
+      if (arma::approx_equal(newM, Mcopy, "absdiff", 1e-12)) {
+        Rcpp::Rcout << "Converged after " << (i + 1) << "iterations.\n";
+        for (int i = 0; i < n; ++i) Y(i) += 1;
+        return(Y);
+      }
+      
+      Mcopy = newM;
+    }
     
+    Rcpp::Rcout << "Reached maximum number of iterations (" << numIter << ").\n";
+    for (int i = 0; i < n; ++i) Y(i) += 1;
     
     // Returns the vector of cluster assignments
     return(Y);
