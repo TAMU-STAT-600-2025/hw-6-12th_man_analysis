@@ -336,8 +336,7 @@ test_that("fitLASSO_prox_Nesterov matches fitLASSO for a single lambda", {
     n_lambda   = 1,
     eps        = eps
   )
-  print(fit_path$beta_mat)
-  
+
   beta_seq      <- fit_path$beta_mat
   intercept_seq <- as.numeric(fit_path$beta0_vec[1])
   
