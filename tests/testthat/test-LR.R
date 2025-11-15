@@ -89,7 +89,7 @@ test_that("multiplication works", {
   
   # Test if the compatibility check for lambda works appropriately
   expect_error(LRMultiClass(X, y, beta_init, lambda = -1),
-               "lambda should be non-ngeative.")
+               "lambda should be non-negative")
   
   # Test if the compatibility checks for beta_init work appropriately
   expect_error(LRMultiClass(X, y, beta_init[-1, ]),
